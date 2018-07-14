@@ -1,9 +1,7 @@
 #ifndef ANSIESC_COLORTEXT_H_
 #define ANSIESC_COLORTEXT_H_
 
-#define CONFIG_USE_COLOR_TEXT (1)
-
-#if CONFIG_USE_COLOR_TEXT
+#if (1)
 #define KNRM  "\x1B[0m" // Reset color
 #define KRED  "\x1B[31m"
 #define KGRN  "\x1B[32m"

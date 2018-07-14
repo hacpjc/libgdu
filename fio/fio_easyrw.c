@@ -71,7 +71,7 @@ void fio_easyrw_exit(struct fio_easyrw *erw)
 	fio_easyrw_free_out(erw);
 }
 
-static fio_easyrw_errnum_t __fio_easyrw_read_simple(struct fio_easyrw *erw, const int fd)
+static fio_easyrw_res_t __fio_easyrw_read_simple(struct fio_easyrw *erw, const int fd)
 {
 	assert(erw->out_max > 0 && erw->out != NULL);
 
@@ -90,7 +90,7 @@ static fio_easyrw_errnum_t __fio_easyrw_read_simple(struct fio_easyrw *erw, cons
 			{
 				if (p_unused == 0)
 				{
-					return FIO_EASYRW_ERRNUM_OK;
+					return FIO_EASYRW_RES_OK;
 				}
 
 				break; // EOF
@@ -110,24 +110,24 @@ static fio_easyrw_errnum_t __fio_easyrw_read_simple(struct fio_easyrw *erw, cons
 			}
 			else
 			{
-				return FIO_EASYRW_ERRNUM_IO; // IO exception.
+				return FIO_EASYRW_RES_IO; // IO exception.
 			}
 		} // end loop
 	}
 
-	return FIO_EASYRW_ERRNUM_MISC;
+	return FIO_EASYRW_RES_MISC;
 }
 
 /**
  * @note Read all data into output.
  */
-fio_easyrw_errnum_t fio_easyrw_read_simple(struct fio_easyrw *erw)
+fio_easyrw_res_t fio_easyrw_read_simple(struct fio_easyrw *erw)
 {
 	fio_easyrw_free_out(erw);
 
 	if (!erw->path)
 	{
-		return FIO_EASYRW_ERRNUM_INVAL;
+		return FIO_EASYRW_RES_INVAL;
 	}
 
 	/*
@@ -140,14 +140,14 @@ fio_easyrw_errnum_t fio_easyrw_read_simple(struct fio_easyrw *erw)
 		{
 			if (lstat(erw->path, &st))
 			{
-				return FIO_EASYRW_ERRNUM_OPEN;
+				return FIO_EASYRW_RES_OPEN;
 			}
 		}
 		else
 		{
 			if (stat(erw->path, &st))
 			{
-				return FIO_EASYRW_ERRNUM_OPEN;
+				return FIO_EASYRW_RES_OPEN;
 			}
 		}
 
@@ -158,7 +158,7 @@ fio_easyrw_errnum_t fio_easyrw_read_simple(struct fio_easyrw *erw)
 
 		if (fio_easyrw_alloc_out(erw, (unsigned int) st.st_size))
 		{
-			return FIO_EASYRW_ERRNUM_NOMEM;
+			return FIO_EASYRW_RES_NOMEM;
 		}
 	}
 
@@ -166,7 +166,7 @@ fio_easyrw_errnum_t fio_easyrw_read_simple(struct fio_easyrw *erw)
 	 * Read file to output
 	 */
 	{
-		fio_easyrw_errnum_t errnum;
+		fio_easyrw_res_t res;
 		int fd;
 		int open_flags;
 
@@ -177,15 +177,15 @@ fio_easyrw_errnum_t fio_easyrw_read_simple(struct fio_easyrw *erw)
 		if (fd < 0)
 		{
 			fio_easyrw_free_out(erw);
-			return FIO_EASYRW_ERRNUM_OPEN;
+			return FIO_EASYRW_RES_OPEN;
 		}
 
-		errnum = __fio_easyrw_read_simple(erw, fd);
-		if (errnum != FIO_EASYRW_ERRNUM_OK)
+		res = __fio_easyrw_read_simple(erw, fd);
+		if (res != FIO_EASYRW_RES_OK)
 		{
 			fio_easyrw_free_out(erw);
 			close(fd);
-			return errnum;
+			return res;
 		}
 
 		close(fd);
@@ -195,10 +195,10 @@ fio_easyrw_errnum_t fio_easyrw_read_simple(struct fio_easyrw *erw)
 	 * The output buffer is kept for caller to use.
 	 */
 
-	return FIO_EASYRW_ERRNUM_OK; // OK
+	return FIO_EASYRW_RES_OK; // OK
 }
 
-static fio_easyrw_errnum_t __fio_easyrw_read(struct fio_easyrw *erw, fio_easyrw_read_func_t func, void *priv, const int fd)
+static fio_easyrw_res_t __fio_easyrw_read(struct fio_easyrw *erw, fio_easyrw_read_func_t func, void *priv, const int fd)
 {
 	assert(erw->out_max > 0 && erw->out != NULL);
 	assert(func != NULL);
@@ -230,28 +230,28 @@ static fio_easyrw_errnum_t __fio_easyrw_read(struct fio_easyrw *erw, fio_easyrw_
 				caller_ret = func(erw, priv);
 				if (caller_ret)
 				{
-					return FIO_EASYRW_ERRNUM_MISC; // Caller stops.
+					return FIO_EASYRW_RES_MISC; // Caller stops.
 				}
 			}
 			else
 			{
-				return FIO_EASYRW_ERRNUM_IO; // IO exception.
+				return FIO_EASYRW_RES_IO; // IO exception.
 			}
 		} // end loop
 	}
 
-	return FIO_EASYRW_ERRNUM_OK;
+	return FIO_EASYRW_RES_OK;
 }
 /**
  * @brief Read data block by block. To read a large file, use this method.
  */
-fio_easyrw_errnum_t fio_easyrw_read(struct fio_easyrw *erw, fio_easyrw_read_func_t func, void *priv)
+fio_easyrw_res_t fio_easyrw_read(struct fio_easyrw *erw, fio_easyrw_read_func_t func, void *priv)
 {
 	fio_easyrw_free_out(erw);
 
 	if (!erw->path)
 	{
-		return FIO_EASYRW_ERRNUM_INVAL;
+		return FIO_EASYRW_RES_INVAL;
 	}
 
 	/*
@@ -264,14 +264,14 @@ fio_easyrw_errnum_t fio_easyrw_read(struct fio_easyrw *erw, fio_easyrw_read_func
 		{
 			if (lstat(erw->path, &st))
 			{
-				return FIO_EASYRW_ERRNUM_OPEN;
+				return FIO_EASYRW_RES_OPEN;
 			}
 		}
 		else
 		{
 			if (stat(erw->path, &st))
 			{
-				return FIO_EASYRW_ERRNUM_OPEN;
+				return FIO_EASYRW_RES_OPEN;
 			}
 		}
 
@@ -282,7 +282,7 @@ fio_easyrw_errnum_t fio_easyrw_read(struct fio_easyrw *erw, fio_easyrw_read_func
 
 		if (fio_easyrw_alloc_out(erw, 8192 /* This is the most effecient buf size in linux */))
 		{
-			return FIO_EASYRW_ERRNUM_NOMEM;
+			return FIO_EASYRW_RES_NOMEM;
 		}
 	}
 
@@ -290,7 +290,7 @@ fio_easyrw_errnum_t fio_easyrw_read(struct fio_easyrw *erw, fio_easyrw_read_func
 	 * Read file to output
 	 */
 	{
-		fio_easyrw_errnum_t errnum;
+		fio_easyrw_res_t res;
 		int fd;
 		int open_flags;
 
@@ -301,15 +301,15 @@ fio_easyrw_errnum_t fio_easyrw_read(struct fio_easyrw *erw, fio_easyrw_read_func
 		if (fd < 0)
 		{
 			fio_easyrw_free_out(erw);
-			return FIO_EASYRW_ERRNUM_OPEN;
+			return FIO_EASYRW_RES_OPEN;
 		}
 
-		errnum = __fio_easyrw_read(erw, func, priv, fd);
-		if (errnum != FIO_EASYRW_ERRNUM_OK)
+		res = __fio_easyrw_read(erw, func, priv, fd);
+		if (res != FIO_EASYRW_RES_OK)
 		{
 			fio_easyrw_free_out(erw);
 			close(fd);
-			return errnum;
+			return res;
 		}
 
 		close(fd);
@@ -317,7 +317,7 @@ fio_easyrw_errnum_t fio_easyrw_read(struct fio_easyrw *erw, fio_easyrw_read_func
 
 	fio_easyrw_free_out(erw); // output buffer is now useless.
 
-	return FIO_EASYRW_ERRNUM_OK; // OK
+	return FIO_EASYRW_RES_OK; // OK
 }
 
 #if 0
@@ -339,17 +339,17 @@ int main(int argc, char **argv)
 
 	{
 		struct fio_easyrw erw;
-		fio_easyrw_errnum_t errnum;
+		fio_easyrw_res_t res;
 
 		fio_easyrw_init(&erw, path, 0, 1);
 
 		/*
 		 * test 1
 		 */
-		errnum = fio_easyrw_read_simple(&erw);
-		if (errnum)
+		res = fio_easyrw_read_simple(&erw);
+		if (res)
 		{
-			printf("...errnum %d %s\n", errnum, strerror(errno));
+			printf("...res %d %s\n", res, strerror(errno));
 		}
 		else
 		{
@@ -359,10 +359,10 @@ int main(int argc, char **argv)
 		/*
 		 * test 2
 		 */
-		errnum = fio_easyrw_read(&erw, cb_func, NULL);
-		if (errnum)
+		res = fio_easyrw_read(&erw, cb_func, NULL);
+		if (res)
 		{
-			printf("...errnum %d %s\n", errnum, strerror(errno));
+			printf("...res %d %s\n", res, strerror(errno));
 		}
 
 		fio_easyrw_exit(&erw);

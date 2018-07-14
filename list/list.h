@@ -23,17 +23,17 @@
 #define _LINUX_LIST_H
 
 #include <stdlib.h>
+#include <linux/types.h>
 
 /**
  * @name from other kernel headers
  */
 /*@{*/
 
-#if 0
 /**
  * Get offset of a member
  */
-#define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
+#define offsetof(TYPE, MEMBER) ((int) &((TYPE *)0)->MEMBER)
 
 /**
  * Casts a member of a structure out to the containing structure
@@ -44,9 +44,8 @@
  */
 #define container_of(ptr, type, member) ({                      \
         const typeof( ((type *)0)->member ) *__mptr = (ptr);    \
-        (type *)( (char *)__mptr - offsetof(type,member) );})
+        (type *)( (char *)__mptr - offsetof(type, member) );})
 /*@}*/
-#endif
 
 /*
  * These are non-NULL pointers that will result in page faults

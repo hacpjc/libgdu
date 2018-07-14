@@ -6,14 +6,14 @@
 
 typedef enum
 {
-	FIO_EASYRW_ERRNUM_OK = 0,
-	FIO_EASYRW_ERRNUM_INVAL,   //!< Invalid input argument
-	FIO_EASYRW_ERRNUM_OPEN,    //!< Cannot open file
-	FIO_EASYRW_ERRNUM_NOMEM,   //!< Cannot alloc memory
-	FIO_EASYRW_ERRNUM_IO,      //!< IO exception
+	FIO_EASYRW_RES_OK = 0,
+	FIO_EASYRW_RES_INVAL,   //!< Invalid input argument
+	FIO_EASYRW_RES_OPEN,    //!< Cannot open file
+	FIO_EASYRW_RES_NOMEM,   //!< Cannot alloc memory
+	FIO_EASYRW_RES_IO,      //!< IO exception
 	FIO_EASYRW_RRRNUM_OVERSZ,  //!< Over pre-defiend limit.
-	FIO_EASYRW_ERRNUM_MISC
-} fio_easyrw_errnum_t;
+	FIO_EASYRW_RES_MISC
+} fio_easyrw_res_t;
 
 /**
  * Read smaller regular files into one buf.
@@ -43,9 +43,9 @@ void *fio_easyrw_get_out(struct fio_easyrw *erw);
 unsigned int fio_easyrw_get_out_len(struct fio_easyrw *erw);
 
 
-fio_easyrw_errnum_t fio_easyrw_read_simple(struct fio_easyrw *erw);
+fio_easyrw_res_t fio_easyrw_read_simple(struct fio_easyrw *erw);
 
 typedef int (* fio_easyrw_read_func_t)(struct fio_easyrw *erw, void *priv);
-fio_easyrw_errnum_t fio_easyrw_read(struct fio_easyrw *erw, fio_easyrw_read_func_t func, void *priv);
+fio_easyrw_res_t fio_easyrw_read(struct fio_easyrw *erw, fio_easyrw_read_func_t func, void *priv);
 
 #endif
