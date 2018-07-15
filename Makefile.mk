@@ -9,4 +9,8 @@ hexdump-obj-y :=
 hexdump-obj-y += hexdump.o
 obj-y += $(addprefix hexdump/, $(hexdump-obj-y))
 
+semlock-obj-y :=
+semlock-obj-y += semlock.o
+obj-y += $(addprefix semlock/, $(semlock-obj-y))
+
 #;
