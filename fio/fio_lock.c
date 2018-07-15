@@ -1,6 +1,16 @@
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <sys/file.h>
+#include <unistd.h>
 
 #include "fio_lock.h"
 
+/**
+ * @brief Lock a file at this process.
+ *
+ * @note Cannot lock twice at the same process.
+ */
 extern int fio_lock(const char *path)
 {
 	int fd;
