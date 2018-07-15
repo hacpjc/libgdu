@@ -8,7 +8,7 @@ typedef enum
 {
 	FIO_EASYRW_RES_OK = 0,
 	FIO_EASYRW_RES_INVAL,   //!< Invalid input argument
-	FIO_EASYRW_RES_OPEN,    //!< Cannot open file
+	FIO_EASYRW_RES_OPEN,    //!< Cannot open file, or the file type is not supported
 	FIO_EASYRW_RES_NOMEM,   //!< Cannot alloc memory
 	FIO_EASYRW_RES_IO,      //!< IO exception
 	FIO_EASYRW_RRRNUM_OVERSZ,  //!< Over pre-defiend limit.
@@ -22,7 +22,6 @@ struct fio_easyrw
 {
 	const char *path;
 
-	unsigned int nofollow : 1; //!< 1: Do not follow link.
 	uint64_t limit; //!< Max file size to read. Avoid reading un-expected large file. (0: unlimited)
 
 	void *out;
@@ -32,11 +31,11 @@ struct fio_easyrw
 	int fd;
 };
 
-#define FIO_EASYRW_INITIALIZER(_path, _limit, _nofollow) \
-	{ .path = (_path), .limit = (_limit), .no_follow = !!(_nofollow), .out = NULL, .out_len = 0, out_max = 0, .fd = -1 }
+#define FIO_EASYRW_INITIALIZER(_path, _limit) \
+	{ .path = (_path), .limit = (_limit), .out = NULL, .out_len = 0, out_max = 0, .fd = -1 }
 
 void fio_easyrw_init(struct fio_easyrw *erw,
-	const char *path, const uint64_t limit, const unsigned int nofollow);
+	const char *path, const uint64_t limit);
 void fio_easyrw_exit(struct fio_easyrw *erw);
 
 void *fio_easyrw_get_out(struct fio_easyrw *erw);

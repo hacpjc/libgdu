@@ -11,12 +11,13 @@
 
 #include "fio_easyrw.h"
 
+#define MY_PAGE_SZ (4096)
+
 void fio_easyrw_init(struct fio_easyrw *erw,
-	const char *path, const uint64_t limit, const unsigned int nofollow)
+	const char *path, const uint64_t limit)
 {
 	erw->path = path;
 	erw->limit = limit;
-	erw->nofollow = !!nofollow;
 
 	erw->fd = -1;
 
@@ -42,7 +43,7 @@ static int fio_easyrw_alloc_out(struct fio_easyrw *erw, const unsigned int len)
 
 	assert(erw->out == NULL);
 
-	buf = malloc(len);
+	buf = malloc(len + MY_PAGE_SZ); // At least 1 page, i.e. never alloc a zero buf.
 	if (!buf)
 	{
 		return -1;
@@ -71,9 +72,10 @@ void fio_easyrw_exit(struct fio_easyrw *erw)
 	fio_easyrw_free_out(erw);
 }
 
-static fio_easyrw_res_t __fio_easyrw_read_simple(struct fio_easyrw *erw, const int fd)
+static fio_easyrw_res_t __fio_easyrw_read_simple(struct fio_easyrw *erw, const int fd, const unsigned int expect_len)
 {
 	assert(erw->out_max > 0 && erw->out != NULL);
+	assert(erw->out_len == 0);
 
 	{
 		ssize_t res;
@@ -88,12 +90,14 @@ static fio_easyrw_res_t __fio_easyrw_read_simple(struct fio_easyrw *erw, const i
 			res = read(fd, p, p_unused);
 			if (res == 0)
 			{
-				if (p_unused == 0)
+				if (accl != expect_len)
 				{
-					return FIO_EASYRW_RES_OK;
+					// The size is not correct. Possibly a short-circuit read.
+					return FIO_EASYRW_RES_IO;
 				}
 
-				break; // EOF
+				erw->out_len = expect_len;
+				break;
 			}
 
 			if (res > 0)
@@ -103,9 +107,12 @@ static fio_easyrw_res_t __fio_easyrw_read_simple(struct fio_easyrw *erw, const i
 				p += res;
 				p_unused -= res;
 
-				if (accl == erw->out_max && read(fd, tmp, sizeof(tmp)) == 0 /* Make sure all data is read. */)
+				/*
+				 * The read size must = predict size
+				 */
+				if (accl > expect_len)
 				{
-					erw->out_len = erw->out_max;
+					return FIO_EASYRW_RES_IO;
 				}
 			}
 			else
@@ -115,7 +122,7 @@ static fio_easyrw_res_t __fio_easyrw_read_simple(struct fio_easyrw *erw, const i
 		} // end loop
 	}
 
-	return FIO_EASYRW_RES_MISC;
+	return FIO_EASYRW_RES_OK;
 }
 
 /**
@@ -123,6 +130,8 @@ static fio_easyrw_res_t __fio_easyrw_read_simple(struct fio_easyrw *erw, const i
  */
 fio_easyrw_res_t fio_easyrw_read_simple(struct fio_easyrw *erw)
 {
+	struct stat st;
+
 	fio_easyrw_free_out(erw);
 
 	if (!erw->path)
@@ -134,21 +143,14 @@ fio_easyrw_res_t fio_easyrw_read_simple(struct fio_easyrw *erw)
 	 * Prepare output
 	 */
 	{
-		struct stat st;
-
-		if (erw->nofollow)
+		if (stat(erw->path, &st)) // follow soft link
 		{
-			if (lstat(erw->path, &st))
-			{
-				return FIO_EASYRW_RES_OPEN;
-			}
+			return FIO_EASYRW_RES_OPEN;
 		}
-		else
+
+		if (!S_ISREG(st.st_mode))
 		{
-			if (stat(erw->path, &st))
-			{
-				return FIO_EASYRW_RES_OPEN;
-			}
+			return FIO_EASYRW_RES_OPEN;
 		}
 
 		if (erw->limit && erw->limit < st.st_size)
@@ -171,7 +173,6 @@ fio_easyrw_res_t fio_easyrw_read_simple(struct fio_easyrw *erw)
 		int open_flags;
 
 		open_flags = O_RDONLY;
-		open_flags |= (erw->nofollow) ? O_NOFOLLOW : 0;
 
 		fd = open(erw->path, open_flags);
 		if (fd < 0)
@@ -180,7 +181,7 @@ fio_easyrw_res_t fio_easyrw_read_simple(struct fio_easyrw *erw)
 			return FIO_EASYRW_RES_OPEN;
 		}
 
-		res = __fio_easyrw_read_simple(erw, fd);
+		res = __fio_easyrw_read_simple(erw, fd, st.st_size);
 		if (res != FIO_EASYRW_RES_OK)
 		{
 			fio_easyrw_free_out(erw);
@@ -260,24 +261,14 @@ fio_easyrw_res_t fio_easyrw_read(struct fio_easyrw *erw, fio_easyrw_read_func_t 
 	{
 		struct stat st;
 
-		if (erw->nofollow)
+		if (stat(erw->path, &st)) // follow soft link
 		{
-			if (lstat(erw->path, &st))
-			{
-				return FIO_EASYRW_RES_OPEN;
-			}
-		}
-		else
-		{
-			if (stat(erw->path, &st))
-			{
-				return FIO_EASYRW_RES_OPEN;
-			}
+			return FIO_EASYRW_RES_OPEN;
 		}
 
-		if (erw->limit && erw->limit < st.st_size)
+		if (!S_ISREG(st.st_mode))
 		{
-			return FIO_EASYRW_RRRNUM_OVERSZ;
+			return FIO_EASYRW_RES_OPEN;
 		}
 
 		if (fio_easyrw_alloc_out(erw, 8192 /* This is the most effecient buf size in linux */))
@@ -295,7 +286,6 @@ fio_easyrw_res_t fio_easyrw_read(struct fio_easyrw *erw, fio_easyrw_read_func_t 
 		int open_flags;
 
 		open_flags = O_RDONLY;
-		open_flags |= (erw->nofollow) ? O_NOFOLLOW : 0;
 
 		fd = open(erw->path, open_flags);
 		if (fd < 0)
@@ -323,7 +313,6 @@ fio_easyrw_res_t fio_easyrw_read(struct fio_easyrw *erw, fio_easyrw_read_func_t 
 #if 0
 static int cb_func(struct fio_easyrw *erw, void *unused)
 {
-
 	static uint64_t accl = 0;
 
 	accl += fio_easyrw_get_out_len(erw);
@@ -341,7 +330,7 @@ int main(int argc, char **argv)
 		struct fio_easyrw erw;
 		fio_easyrw_res_t res;
 
-		fio_easyrw_init(&erw, path, 0, 1);
+		fio_easyrw_init(&erw, path, 0 /* no limit */);
 
 		/*
 		 * test 1
