@@ -83,8 +83,6 @@ static fio_easyrw_res_t __fio_easyrw_read_simple(struct fio_easyrw *erw, const i
 		unsigned int p_unused = erw->out_max;
 		uint8_t *p = (uint8_t *) erw->out;
 
-		uint8_t tmp[64];
-
 		while (1)
 		{
 			res = read(fd, p, p_unused);

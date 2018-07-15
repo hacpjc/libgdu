@@ -13,4 +13,8 @@ semlock-obj-y :=
 semlock-obj-y += semlock.o
 obj-y += $(addprefix semlock/, $(semlock-obj-y))
 
+dirtrav-obj-y :=
+dirtrav-obj-y += dirtrav.o
+obj-y += $(addprefix dirtrav/, $(dirtrav-obj-y))
+
 #;

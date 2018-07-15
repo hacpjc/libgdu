@@ -9,6 +9,7 @@ libgdu-static := libgdu.a
 
 CFLAGS := -I$(CURDIR) -fPIC
 CFLAGS += -g
+CFLAGS += -Wall
  
 LDFLAGS := -shared
 LDFLAGS += 
