@@ -4,7 +4,7 @@
 *.so
 *.a
 
-# eclipse
-.*
+# eclipse or hidden files
 .*
 
+#;
