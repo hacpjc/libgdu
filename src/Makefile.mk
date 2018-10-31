@@ -17,4 +17,8 @@ dirtrav-obj-y :=
 dirtrav-obj-y += dirtrav.o
 obj-y += $(addprefix dirtrav/, $(dirtrav-obj-y))
 
+rbtree-obj-y :=
+rbtree-obj-y += rbtree.o
+obj-y += $(addprefix rbtree/, $(rbtree-obj-y))
+
 #;
