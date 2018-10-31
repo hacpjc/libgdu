@@ -25,4 +25,8 @@ fifobuf-obj-y :=
 fifobuf-obj-y += fifobuf.o
 obj-y += $(addprefix fifobuf/, $(fifobuf-obj-y))
 
+ctrie-obj-y :=
+ctrie-obj-y += ctrie.o
+obj-y += $(addprefix ctrie/, $(ctrie-obj-y))
+
 #;
