@@ -1008,3 +1008,38 @@ void ctrie_debug(ctrie_t *ctrie)
 
 	ctrie_debug_state(ctrie);
 }
+
+
+#if (0)
+int main(void)
+{
+	ctrie_t ctrie;
+
+	ctrie_init(&ctrie, CTRIE_TYPE_24BIT, 1);
+
+	{
+		ctrie_desc_t desc_tbl[] =
+		{
+			CTRIE_DESC_INITIALIZER(0, "abc", 3),
+			CTRIE_DESC_INITIALIZER(0, "acd", 3),
+		};
+
+		ctrie_build_by_desc_tbl(&ctrie, desc_tbl, 2);
+	}
+
+	{
+		ctrie_ctx_t ctrie_ctx;
+		ctrie_res_t ctrie_res;
+
+		ctrie_ctx_init(&ctrie_ctx);
+
+		ctrie_res = ctrie_trans(&ctrie_ctx, &ctrie, "abc", 3, NULL);
+		printf("%d\n", ctrie_res);
+		assert(CTRIE_RES_FINISH == ctrie_res);
+	}
+
+	ctrie_exit(&ctrie);
+
+	return 0;
+}
+#endif
