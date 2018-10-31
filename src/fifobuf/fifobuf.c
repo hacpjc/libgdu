@@ -742,7 +742,7 @@ unsigned int fifobuf_calibrate_data_size(unsigned int minimal)
 	return pow2_adjust(minimal);
 }
 
-#if (1)
+#if (0)
 int main(void)
 {
 	fifobuf_t fb;
