@@ -92,7 +92,7 @@ __rb_rotate_set_parents(struct rb_node *old, struct rb_node *new,
 	__rb_change_child(old, new, parent, root);
 }
 
-static __always_inline void
+static __attribute__((unused)) inline void
 __rb_insert(struct rb_node *node, struct rb_root *root,
 	    bool newleft, struct rb_node **leftmost,
 	    void (*augment_rotate)(struct rb_node *old, struct rb_node *new))
@@ -238,7 +238,7 @@ __rb_insert(struct rb_node *node, struct rb_root *root,
  * Inline version for rb_erase() use - we want to be able to inline
  * and eliminate the dummy_rotate callback there
  */
-static __always_inline void
+static __attribute__((unused)) inline void
 ____rb_erase_color(struct rb_node *parent, struct rb_root *root,
 	void (*augment_rotate)(struct rb_node *old, struct rb_node *new))
 {
