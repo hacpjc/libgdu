@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <ctype.h>
 #include <assert.h>
 
 #include "ctrie.h"
@@ -231,7 +232,7 @@ static int ctrie_realloc_state(ctrie_t *ctrie, unsigned int new_max_state)
 	if (new_max_state < ctrie->state_max)
 	{
 		ERR("Invalid realloc state num %u -> %u", new_max_state, ctrie->state_max);
-		BUG();
+		BUG_ON(1);
 		return -1;
 	}
 
@@ -258,7 +259,7 @@ static int ctrie_realloc_state(ctrie_t *ctrie, unsigned int new_max_state)
 			}
 			break;
 		default:
-			BUG();
+			BUG_ON(1);
 			break;
 		}
 
@@ -653,7 +654,7 @@ static int state24_build_by_desc_tbl_bfs(
 				else
 				{
 					ERR("Detect a duplicated ctrie desc idx %u (desc id %u)", idx, state_child->desc_id);
-					BUG();
+					BUG_ON(1);
 				}
 			}
 
@@ -668,7 +669,6 @@ static int state24_build_by_desc_tbl_bfs(
 
 static int __build_by_desc_tbl(ctrie_t *ctrie, ctrie_desc_t *tbl, const unsigned int tbl_size)
 {
-	unsigned int off;
 	ctrie_state_id_t state_id;
 	ctrie_state_t *state;
 
