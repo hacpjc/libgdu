@@ -21,4 +21,8 @@ rbtree-obj-y :=
 rbtree-obj-y += rbtree.o
 obj-y += $(addprefix rbtree/, $(rbtree-obj-y))
 
+fifobuf-obj-y :=
+fifobuf-obj-y += fifobuf.o
+obj-y += $(addprefix fifobuf/, $(fifobuf-obj-y))
+
 #;

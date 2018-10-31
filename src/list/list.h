@@ -33,7 +33,11 @@
 /**
  * Get offset of a member
  */
-#define offsetof(TYPE, MEMBER) ((int) &((TYPE *)0)->MEMBER)
+#if (1)
+#define offsetof(TYPE, MEMBER) __builtin_offsetof(TYPE, MEMBER) // GCC builtin
+#else
+#define offsetof(TYPE, MEMBER) ((int) (&((TYPE *)0)->MEMBER))
+#endif
 
 /**
  * Casts a member of a structure out to the containing structure
