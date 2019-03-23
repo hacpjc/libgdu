@@ -46,12 +46,12 @@ void hexdump_f(FILE *fp, const unsigned char *data, const unsigned int nbytes, c
 		snprintf(hdtmp, sizeof(hdtmp), "%02X ", i);
 		snprintf(hrtmp, sizeof(hrtmp), "%X", i);
 
-		strncat(hd, hdtmp, sizeof(hd));
-		strncat(hr, hrtmp, sizeof(hr));
+		strcat(hd, hdtmp);
+		strcat(hr, hrtmp);
 		if ((i % 16) == 7)
 		{
-			strncat(hr, " ", sizeof(hr));
-			strncat(hd, " ", sizeof(hd));
+			strcat(hr, " ");
+			strcat(hd, " ");
 		}
 	}
 
@@ -64,22 +64,22 @@ void hexdump_f(FILE *fp, const unsigned char *data, const unsigned int nbytes, c
 	for (i = 0; i < nbytes; i++)
 	{
 		snprintf(hdtmp, sizeof(hdtmp), "%02X ", data[i]);
-		strncat(hd, hdtmp, sizeof(hd));
+		strcat(hd, hdtmp);
 
 		if (data[i] < 0x21 || data[i] > 0x7e)
 		{
-			strncat(hr, ".", sizeof(hr));
+			strcat(hr, ".");
 		}
 		else
 		{
 			snprintf(hrtmp, sizeof(hrtmp), "%c", data[i]);
-			strncat(hr, hrtmp, sizeof(hr));
+			strcat(hr, hrtmp);
 		}
 
 		if ((i % 16) == 7)
 		{
-			strncat(hr, " ", sizeof(hr));
-			strncat(hd, " ", sizeof(hd));
+			strcat(hr, " ");
+			strcat(hd, " ");
 		}
 		else if ((i % 16) == 15)
 		{

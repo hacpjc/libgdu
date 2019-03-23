@@ -4,8 +4,8 @@ DIR_PACK_LIB := $(DIR_PACK)/lib
 
 include Makefile.mk
 
-libgdu-shared := libgdu.so
-libgdu-static := libgdu.a
+liblgu-shared := liblgu.so
+liblgu-static := liblgu.a
 
 CFLAGS := -I$(CURDIR) -fPIC
 CFLAGS += -g
@@ -18,13 +18,13 @@ LDFLAGS +=
 default: all
 
 .PHONY: all
-all: $(libgdu-static) $(libgdu-shared)
+all: $(liblgu-static) $(liblgu-shared)
 
-$(libgdu-static): $(obj-y)
+$(liblgu-static): $(obj-y)
 	@mkdir -vp $(DIR_PACK_LIB)
 	ar -rcs $(DIR_PACK_LIB)/$@ $(obj-y)
 
-$(libgdu-shared): $(obj-y)
+$(liblgu-shared): $(obj-y)
 	@mkdir -vp $(DIR_PACK_LIB)
 	$(CC) $(LDFLAGS) -Wl,-soname,$@ -o $(DIR_PACK_LIB)/$@ $<
 
@@ -35,5 +35,8 @@ $(obj-y):
 clean:
 	-@rm -vf $(obj-y)
 	-@rm -rvf $(DIR_PACK)
+
+.PHONY: distclean
+distclean: clean
 
 #;

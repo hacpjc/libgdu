@@ -36,7 +36,8 @@
 #if (1)
 #define offsetof(TYPE, MEMBER) __builtin_offsetof(TYPE, MEMBER) // GCC builtin
 #else
-#define offsetof(TYPE, MEMBER) ((int) (&((TYPE *)0)->MEMBER))
+#undef offsetof
+#define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
 #endif
 
 /**
