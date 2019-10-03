@@ -11,12 +11,13 @@
  *
  * @note Cannot lock twice at the same process.
  */
-extern int fio_lock(const char *path)
+int fio_lock(const char *path)
 {
 	int fd;
 
 	fd = open(path, O_RDONLY | O_CREAT, S_IRWXU | S_IRGRP | S_IROTH);
-	if (fd < 0) {
+	if (fd < 0)
+	{
 		return -1;
 	}
 
@@ -28,9 +29,29 @@ extern int fio_lock(const char *path)
 	return fd;
 }
 
-extern int fio_unlock(const int fd)
+int fio_trylock(const char *path)
 {
-	if (fd < 0) {
+	int fd;
+
+	fd = open(path, O_RDONLY | O_CREAT, S_IRWXU | S_IRGRP | S_IROTH);
+	if (fd < 0)
+	{
+		return -1;
+	}
+
+	if (flock(fd, LOCK_NB | LOCK_EX))
+	{
+		close(fd);
+		return -1;
+	}
+
+	return fd;
+}
+
+int fio_unlock(const int fd)
+{
+	if (fd < 0)
+	{
 		return -1;
 	}
 
