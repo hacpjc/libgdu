@@ -29,4 +29,8 @@ ctrie-obj-y :=
 ctrie-obj-y += ctrie.o
 obj-y += $(addprefix ctrie/, $(ctrie-obj-y))
 
+logmsg-obj-y :=
+logmsg-obj-y += logmsg.o
+obj-y += $(addprefix logmsg/, $(logmsg-obj-y))
+
 #;

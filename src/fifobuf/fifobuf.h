@@ -2,7 +2,7 @@
 #ifndef FIFOBUF_H_
 #define FIFOBUF_H_
 
-#include "list/list.h"
+#include <assert.h>
 
 /*
  * fifobuf:
@@ -42,6 +42,7 @@ int fifobuf_enqueue_zero_padding(fifobuf_t *fb);
 void fifobuf_debug(fifobuf_t *fb);
 unsigned int fifobuf_dequeue(fifobuf_t *fb, uint8_t *buf, unsigned int buf_len);
 
+#define FIFOBUF_DATA_SIZE_DFL (4096)
 #define fifobuf_init(_fb, _data_size) \
 	do { \
 		INIT_LIST_HEAD(&(_fb)->list_data_fifo); \
@@ -49,9 +50,10 @@ unsigned int fifobuf_dequeue(fifobuf_t *fb, uint8_t *buf, unsigned int buf_len);
 		(_fb)->data_used = 0; \
 		(_fb)->data_free = 0; \
 		(_fb)->data_size = (_data_size); \
+		assert((_fb)->data_size >= 512); \
 	} while (0)
 
-#define fifobuf_get_data_size(_fb) ((_fb)->data_size)
+#define fifobuf_get_data_used(_fb) ((_fb)->data_used)
 
 void fifobuf_flush(fifobuf_t *fb);
 void fifobuf_exit(fifobuf_t *fb);

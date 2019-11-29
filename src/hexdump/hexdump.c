@@ -29,10 +29,12 @@
 000000F0 F0 F1 F2 F3 F4 F5 F6 F7  F8 F9 FA FB FC FD FE FF  |........ ........|
  * \endcode
  */
-void hexdump_f(FILE *fp, const unsigned char *data, const unsigned int nbytes, const unsigned int limit)
+void hexdump_f(FILE *fp, const unsigned char *data, const unsigned int data_len, const unsigned int limit)
 {
 	register unsigned int i;
 	unsigned int line = 0;
+
+	unsigned int nbytes = data_len;
 
 	char hd[50] = { 0 };
 	char hr[20] = { 0 };
@@ -40,6 +42,11 @@ void hexdump_f(FILE *fp, const unsigned char *data, const unsigned int nbytes, c
 	char hrtmp[8] = { 0 };
 
 	fprintf(fp, "%s, len=%u, limit=%u:\n", __FUNCTION__, nbytes, limit);
+
+	if (limit && nbytes >= limit)
+	{
+		nbytes = limit;
+	}
 
 	for (i = 0; i < 16; i++)
 	{
