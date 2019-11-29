@@ -17,10 +17,10 @@ int unixsock_open(const char *path)
 {
 	int fd;
 
-	if (access(path, R_OK | W_OK))
-	{
-		return -1;
-	}
+//	if (access(path, R_OK | W_OK))
+//	{
+//		return -1;
+//	}
 
 	fd = socket(AF_UNIX, SOCK_STREAM, 0);
 	if (fd < 0)
@@ -74,7 +74,6 @@ again:
 	{
 		if (errno == EAGAIN || errno == EINTR)
 		{
-			fprintf(stderr, "again\n");
 			goto again;
 		}
 	}
