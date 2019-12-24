@@ -50,7 +50,7 @@ struct initops
 #define INITOPS_INITIALIZER(__name, __order, __init, __exit, __priv) \
 	{ .name = __name, .order = __order, .init = __init, .exit = __exit, .priv = __priv }
 
-#define DEFINE_INITOPS(_name, _order, _init, _exit, _priv) \
+#define INITOPS_DEFINE(_name, _order, _init, _exit, _priv) \
 	struct initops __initops_##_name = INITOPS_INITIALIZER(#_name, _order, _init, _exit, _priv); \
 	struct initops * __initops_##_name##_p __attribute__((section ("section_initops"))) = &(__initops_##_name)
 

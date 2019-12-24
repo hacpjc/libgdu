@@ -16,7 +16,7 @@ static void initops_dummy_exit(void *unused)
 	sync();
 }
 
-DEFINE_INITOPS(initops_dummy, INITOPS_ORDER_MAX, initops_dummy_init, initops_dummy_exit, NULL);
+INITOPS_DEFINE(initops_dummy, INITOPS_ORDER_MAX, initops_dummy_init, initops_dummy_exit, NULL);
 
 /*
  * Create automatically by gcc.
@@ -24,7 +24,7 @@ DEFINE_INITOPS(initops_dummy, INITOPS_ORDER_MAX, initops_dummy_init, initops_dum
 extern struct initops *__start_section_initops;
 extern struct initops *__stop_section_initops;
 
-static int initops_exec_exit_by_order(initops_order_t order)
+static void initops_exec_exit_by_order(initops_order_t order)
 {
 	struct initops **iter = &__start_section_initops;
 
@@ -55,7 +55,7 @@ static int initops_exec_init_by_order(initops_order_t order)
 		if (initops->order == order && initops->init)
 		{
 			ret = initops->init(initops->priv);
-			if (ret < 0)
+			if (ret)
 			{
 				goto fallback;
 			}
@@ -70,9 +70,12 @@ fallback:
 		return -1; // Do not need to do fallback task.
 	}
 
-	for (; iter > &__start_section_initops; iter--)
+	iter--;
+
+	for (; iter >= &__start_section_initops; iter--)
 	{
 		struct initops *initops = *iter;
+
 		if (initops->order == order && initops->exit)
 		{
 			initops->exit(initops->priv);
@@ -111,7 +114,7 @@ int initops_exec_init(void)
 
 fallback:
 	order -= 1;
-	for (; order > INITOPS_ORDER_FIRST /* Skip first! */; order--)
+	for (; order >= INITOPS_ORDER_FIRST; order--)
 	{
 		initops_exec_exit_by_order(order);
 	}
