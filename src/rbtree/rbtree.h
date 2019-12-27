@@ -39,9 +39,13 @@
 #define __rb_force __attribute__((force))
 #endif
 
+#define rb_container_of(ptr, type, member) ({ \
+		typeof( ((type *)0)->member ) *__mptr = (ptr); \
+		(type *)( (char *)__mptr - offsetof(type, member) );})
+
 #if (1)
-#define rb_rcu_assign_pointer(_p, _pin) _p = (_pin) // FIXME
-#define rb_barrier() __memory_barrier()
+#define rb_rcu_assign_pointer(_p, _pin) do { _p = (_pin); } while (0)
+#define rb_barrier() do { } while (0)
 #define rb_memcpy(_p, _src, _len) __builtin_memcpy((void *) p, (const void *) res, size)
 #else
 #define rb_rcu_assign_pointer(_p, _pin) _p = (_pin) // FIXME
@@ -106,7 +110,7 @@ struct rb_root_cached
 
 #define RB_ROOT	(struct rb_root) { NULL, }
 #define RB_ROOT_CACHED (struct rb_root_cached) { {NULL, }, NULL }
-#define	rb_entry(ptr, type, member) container_of(ptr, type, member)
+#define	rb_entry(ptr, type, member) rb_container_of(ptr, type, member)
 
 #define RB_EMPTY_ROOT(root)  (READ_ONCE((root)->rb_node) == NULL)
 
